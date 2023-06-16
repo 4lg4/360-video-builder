@@ -3,10 +3,11 @@
 FOLDER_INPUT="/Users/paulaceron/ALGA/dev/360-video-builder/files/input"
 FOLDER_OUTPUT="/Users/paulaceron/ALGA/dev/360-video-builder/files/input"
 COUNT=$(ls $FOLDER_OUTPUT/final*.mp4 | wc -l | sed 's/ //g')
-LENS_ANGLE=188
+LENS_ANGLE=188 # iv_fov / ih_fov
 VIDEO_WIDTH=3840
 VIDEO_HEIGHT="1920"
 VIDEO_METATAGS="$FOLDER_INPUT/data_tags.mp4"
+ORIENTATION=90 # roll=90
 
 # VIDEO_INPUT="\"concat:$FOLDER_INPUT/1.insv|$FOLDER_INPUT/2.insv\""
 VIDEO_FILES="$FOLDER_INPUT/files.txt"
@@ -37,14 +38,14 @@ createMergeMap () {
 
 COMMAND="$FFMPEG \
 -i $VIDEO_INPUT -i $MERGE_MAP -profile:v High -pix_fmt yuv420p \
--lavfi \"[0]format=rgb24,split[a][b];[a]crop=ih:iw/2:0:0, v360=input=fisheye:output=e:ih_fov=$LENS_ANGLE:iv_fov=$LENS_ANGLE:roll=90[c]; [b]crop=ih:iw/2:iw/2:0,v360=input=fisheye:output=e:yaw=$YAW:ih_fov=$LENS_ANGLE:iv_fov=$LENS_ANGLE:roll=90[d]; [c][d][1]maskedmerge,format=rgb24\" \
+-lavfi \"[0]format=rgb24,split[a][b];[a]crop=ih:iw/2:0:0, v360=input=fisheye:output=e:ih_fov=$LENS_ANGLE:iv_fov=$LENS_ANGLE:roll=$ORIENTATION[c]; [b]crop=ih:iw/2:iw/2:0,v360=input=fisheye:output=e:yaw=$YAW:ih_fov=$LENS_ANGLE:iv_fov=$LENS_ANGLE:roll=$ORIENTATION[d]; [c][d][1]maskedmerge,format=rgb24\" \
 -y $VIDEO_OUTPUT && \ "
 
 echo $COMMAND
 # $($COMMAND)
 
 COMMAND_SINGLE="$FFMPEG -f concat -safe 0 -i $VIDEO_INPUT \
- -vf v360=dfisheye:e:ih_fov=$LENS_ANGLE:iv_fov=$LENS_ANGLE:roll=-180 \
+ -vf v360=dfisheye:e:ih_fov=$LENS_ANGLE:iv_fov=$LENS_ANGLE:roll=$ORIENTATION \
  $VIDEO_OUTPUT"
 
 echo  "------"
